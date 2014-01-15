@@ -7,9 +7,9 @@ import (
 	"database/sql"
 )
 
-type Tag struct {
-	Uid int
-	Name string
+type Tags struct {
+	Id int
+	Title string
 }
 
 var orm beedb.Model
@@ -24,8 +24,12 @@ func main() {
 }
 
 func insertTag() {
-	var mytag Tag
-	mytag.Name = "First Tag"
-	orm.Save(&mytag)
-	fmt.Println(mytag)
+	var mytag Tags
+	mytag.Title = "First Tag"
+	err := orm.Save(&mytag)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(mytag)
+	}
 }
