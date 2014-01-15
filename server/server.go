@@ -12,6 +12,14 @@ type Tags struct {
 	Title string
 }
 
+type Project struct {
+	Id int
+	Title string
+	Github string
+	Organization string
+	Description string
+}
+
 var orm beedb.Model
 
 func main() {
@@ -20,7 +28,15 @@ func main() {
 		panic(err)
 	}
 	orm = beedb.New(db)
-	insertTag()
+	fmt.Printf("Here are the tags with their ids:\n")
+	printTags()
+	var projname string
+	fmt.Printf("Add a new project. Name: ")
+	fmt.Scanf("%s", &projname)
+	fmt.Printf("Associate a tag with your project by id: ")
+	var projtag int
+	fmt.Scanf("%d", %projtag)
+
 }
 
 func insertTag() {
