@@ -23,6 +23,7 @@ func main() {
 	beedb.PluralizeTableNames=true
 	orm = beedb.New(db)
 	insertTag()
+	getAllTags()
 }
 
 func insertTag() {
@@ -37,9 +38,21 @@ func insertTag() {
 }
 
 
-/* func getTag() {
+func getTag(tagId int) {
+	var mytag Tag
+	orm.Where("id=?",tagId).Find(&mytag)
+	fmt.Println(mytag)
+} 
 
-	var mytag Tags
+func getAllTags(){
+	var allTags []Tag
+	orm.FindAll(&allTags)
+	fmt.Println(allTags)
+}
 
+func getProjectsWithTag(tagId int){
+	var projectsWithTag Project
+	orm.Where("projectId = ?",tagId).FindAll(&projectsWithTag)
+	fmt.Println(projectsWithTag)
+}
 
-} */
