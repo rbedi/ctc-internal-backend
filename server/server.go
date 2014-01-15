@@ -7,7 +7,7 @@ import (
 	"database/sql"
 )
 
-type Tags struct {
+type Tag struct {
 	Id int
 	Title string
 }
@@ -19,12 +19,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	beedb.PluralizeTableNames=true
 	orm = beedb.New(db)
 	insertTag()
 }
 
 func insertTag() {
-	var mytag Tags
+	var mytag Tag
 	mytag.Title = "First Tag"
 	err := orm.Save(&mytag)
 	if err != nil {
@@ -33,3 +35,11 @@ func insertTag() {
 		fmt.Println(mytag)
 	}
 }
+
+
+/* func getTag() {
+
+	var mytag Tags
+
+
+} */
