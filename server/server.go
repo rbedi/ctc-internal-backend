@@ -9,7 +9,11 @@ import (
 
 type Tag struct {
 	Id int
-	Title string
+	Name string
+}
+
+func (tag Tag) String() string {
+	return fmt.Sprintf("\n\t{\n\t id: %d\n\t name: %s\n\t}\n", tag.Id, tag.Name)
 }
 
 type Project struct {
@@ -18,6 +22,11 @@ type Project struct {
 	Github string
 	Organization string
 	Description string
+}
+
+type ProjectTag struct {
+	ProjectId int
+	TagId int
 }
 
 var orm beedb.Model
@@ -30,18 +39,48 @@ func main() {
 	orm = beedb.New(db)
 	fmt.Printf("Here are the tags with their ids:\n")
 	printTags()
-	var projname string
-	fmt.Printf("Add a new project. Name: ")
-	fmt.Scanf("%s", &projname)
-	fmt.Printf("Associate a tag with your project by id: ")
-	var projtag int
-	fmt.Scanf("%d", %projtag)
+	fmt.Printf("Would you like to make a new project? (true or false)")
+	var makeProj bool
+	fmt.Scanf("%t", &makeProj)
+	if (makeProj) {
+		addProject()
+	}
+}
 
+func addProject() {
+	var newProject Project
+	fmt.Printf("Add a new project. Title: ")
+	fmt.Scanf("%s", &newProject.Title)
+	fmt.Printf("Github link: ")
+	fmt.Scanf("%s", &newProject.Github)
+	fmt.Printf("Organization: ")
+	fmt.Scanf("%s", &newProject.Organization)
+	fmt.Printf("Description: ")
+	fmt.Scanf("%s", &newProject.Description)
+
+	insertProject(newProject)
+
+	fmt.Printf("Would you like to associate a tag with your project? (true or false)")
+	var doAssociate bool
+	fmt.Scanf("%t", &doAssociate)
+	if (doAssociate) {
+		associateTag()
+	}
+}
+
+func associateTag() {
+	fmt.Printf("Associate a tag with your project by tag id: ")
+	var projtag ProjectTag
+	fmt.Scanf("%d", &projtag.TagId)
+}
+
+func insertProject(newProject Project) error {
+	return orm.Save(&newProject)
 }
 
 func insertTag() {
 	var mytag Tag
-	mytag.Title = "First Tag"
+	mytag.Name = "First Tag"
 	err := orm.Save(&mytag)
 	if err != nil {
 		fmt.Println(err)
@@ -54,17 +93,22 @@ func getTag(tagId int) {
 	var mytag Tag
 	orm.Where("id=?",tagId).Find(&mytag)
 	fmt.Println(mytag)
-} 
-
-func getAllTags(){
-	var allTags []Tag
-	orm.FindAll(&allTags)
-	fmt.Println(allTags)
 }
 
-func getProjectsWithTag(tagId int){
-	var projectsWithTag Project
+func printTags() {
+	var allTags []Tag = getAllTags()
+	fmt.Println(allTags)
+} 
+
+func getAllTags() []Tag {
+	var allTags []Tag
+	orm.FindAll(&allTags)
+	return allTags
+}
+
+func getProjectsWithTag(tagId int) []Project {
+	var projectsWithTag []Project
 	orm.Where("projectId = ?",tagId).FindAll(&projectsWithTag)
-	fmt.Println(projectsWithTag)
+	return projectsWithTag
 }
 
