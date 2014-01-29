@@ -39,6 +39,12 @@ func initDB() {
 	}
 }
 
+func getProjectInfo(projectId int) Project{
+	var curProject Project
+	db.Get(&curProject, "SELECT * FROM project WHERE id = $1", projectId)
+	return curProject
+}
+
 func addProject() {
 	var newProject Project
 	fmt.Printf("Add a new project Title: ")
