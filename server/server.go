@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/astaxie/beedb"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
-	"database/sql"
+	_ "database/sql"
 )
 
 type Tag struct {
@@ -18,10 +18,10 @@ func (tag Tag) String() string {
 
 type Project struct {
 	Id int
-	Title string
-	Github string
-	Organization string
-	Description string
+	Title string `db:"title"`
+	Github string `db:"github"`
+	Organization string `db:"organization"`
+	Description string `db:"description"`
 }
 
 type ProjectTag struct {
@@ -29,19 +29,19 @@ type ProjectTag struct {
 	TagId int
 }
 
-var orm beedb.Model
+var db *sqlx.DB
 
 func main() {
-	db, err := sql.Open("sqlite3", "./main.db")
+	var err error
+	db, err = sqlx.Open("sqlite3", "./main.db")
 	if err != nil {
 		panic(err)
 	}
-	orm = beedb.New(db)
 	fmt.Printf("Here are the tags with their ids:\n")
 	printTags()
-	fmt.Printf("Would you like to make a new project? (true or false)")
+	fmt.Printf("Would you like to make a new project? (true or false) ")
 	var makeProj bool
-	fmt.Scanf("%t", &makeProj)
+	fmt.Scanf("%t\n", &makeProj)
 	if (makeProj) {
 		addProject()
 	}
@@ -49,20 +49,20 @@ func main() {
 
 func addProject() {
 	var newProject Project
-	fmt.Printf("Add a new project. Title: ")
-	fmt.Scanf("%s", &newProject.Title)
+	fmt.Printf("Add a new project Title: ")
+	fmt.Scanf("%s\n", &newProject.Title)
 	fmt.Printf("Github link: ")
-	fmt.Scanf("%s", &newProject.Github)
-	fmt.Printf("Organization: ")
-	fmt.Scanf("%s", &newProject.Organization)
-	fmt.Printf("Description: ")
-	fmt.Scanf("%s", &newProject.Description)
+	fmt.Scanf("%s\n", &newProject.Github)
+	fmt.Print("Organization: ")
+	fmt.Scanf("%s\n", &newProject.Organization)
+	fmt.Print("Description: ")
+	fmt.Scanf("%s\n", &newProject.Description)
 
 	insertProject(newProject)
 
-	fmt.Printf("Would you like to associate a tag with your project? (true or false)")
+	fmt.Printf("Would you like to associate a tag with your project? (true or false) ")
 	var doAssociate bool
-	fmt.Scanf("%t", &doAssociate)
+	fmt.Scanf("%t\n", &doAssociate)
 	if (doAssociate) {
 		associateTag()
 	}
@@ -71,28 +71,15 @@ func addProject() {
 func associateTag() {
 	fmt.Printf("Associate a tag with your project by tag id: ")
 	var projtag ProjectTag
-	fmt.Scanf("%d", &projtag.TagId)
+	fmt.Scanf("%d\n", &projtag.TagId)
+
 }
 
 func insertProject(newProject Project) error {
-	return orm.Save(&newProject)
-}
-
-func insertTag() {
-	var mytag Tag
-	mytag.Name = "First Tag"
-	err := orm.Save(&mytag)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(mytag)
-	}
-}
-
-func getTag(tagId int) {
-	var mytag Tag
-	orm.Where("id=?",tagId).Find(&mytag)
-	fmt.Println(mytag)
+	tx := db.MustBegin()
+	tx.NamedExec("INSERT INTO project (title, github, organization, description) VALUES (:title, :github, :organization, :description)", &newProject)
+	err := tx.Commit()
+	return err
 }
 
 func printTags() {
@@ -102,13 +89,6 @@ func printTags() {
 
 func getAllTags() []Tag {
 	var allTags []Tag
-	orm.FindAll(&allTags)
+	db.Select(&allTags, "SELECT * FROM tag")
 	return allTags
 }
-
-func getProjectsWithTag(tagId int) []Project {
-	var projectsWithTag []Project
-	orm.Where("projectId = ?",tagId).FindAll(&projectsWithTag)
-	return projectsWithTag
-}
-
