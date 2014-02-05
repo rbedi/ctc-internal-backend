@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ type ProjectTag struct {
 
 var db *sqlx.DB
 
-func initDB() {
+func InitDB() {
 	var err error
 	db, err = sqlx.Open("sqlite3", "./main.db")
 	if err != nil {
@@ -39,13 +39,13 @@ func initDB() {
 	}
 }
 
-func getProjectInfo(projectId int) Project{
+func GetProjectInfo(projectId int) Project{
 	var curProject Project
 	db.Get(&curProject, "SELECT * FROM project WHERE id = $1", projectId)
 	return curProject
 }
 
-func addProject() {
+func AddProject() {
 	var newProject Project
 	fmt.Printf("Add a new project Title: ")
 	fmt.Scanf("%s\n", &newProject.Title)
@@ -56,36 +56,36 @@ func addProject() {
 	fmt.Print("Description: ")
 	fmt.Scanf("%s\n", &newProject.Description)
 
-	insertProject(newProject)
+	InsertProject(newProject)
 
 	fmt.Printf("Would you like to associate a tag with your project? (true or false) ")
 	var doAssociate bool
 	fmt.Scanf("%t\n", &doAssociate)
 	if (doAssociate) {
-		associateTag()
+		AssociateTag()
 	}
 }
 
-func associateTag() {
+func AssociateTag() {
 	fmt.Printf("Associate a tag with your project by tag id: ")
 	var projtag ProjectTag
 	fmt.Scanf("%d\n", &projtag.TagId)
 
 }
 
-func insertProject(newProject Project) error {
+func InsertProject(newProject Project) error {
 	tx := db.MustBegin()
 	tx.NamedExec("INSERT INTO project (title, github, organization, description) VALUES (:title, :github, :organization, :description)", &newProject)
 	err := tx.Commit()
 	return err
 }
 
-func printTags() {
-	var allTags []Tag = getAllTags()
+func PrintTags() {
+	var allTags []Tag = GetAllTags()
 	fmt.Println(allTags)
 } 
 
-func getAllTags() []Tag {
+func GetAllTags() []Tag {
 	var allTags []Tag
 	db.Select(&allTags, "SELECT * FROM tag")
 	return allTags
